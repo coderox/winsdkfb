@@ -30,10 +30,10 @@ Color HlsColor::RgbValue::get(
 
     if (_S == 0)
     {
-        result.R = (byte)(_L * 255);
-        result.G = (byte)(_L * 255);
-        result.B = (byte)(_L * 255);
-        result.A = (byte)(_A * 255);
+        result.R = (unsigned char)(_L * 255);
+        result.G = (unsigned char)(_L * 255);
+        result.B = (unsigned char)(_L * 255);
+        result.A = (unsigned char)(_A * 255);
     }
     else
     {
@@ -60,10 +60,10 @@ Color HlsColor::RgbValue::get(
         double tB = h - (1.0 / 3.0);
         double b = TransformColor(t1, t2, tB);
 
-        result.R = (byte)(r * 255);
-        result.G = (byte)(g * 255);
-        result.B = (byte)(b * 255);
-        result.A = (byte)(_A * 255);
+        result.R = (unsigned char)(r * 255);
+        result.G = (unsigned char)(g * 255);
+        result.B = (unsigned char)(b * 255);
+        result.A = (unsigned char)(_A * 255);
     }
 
     return result;
