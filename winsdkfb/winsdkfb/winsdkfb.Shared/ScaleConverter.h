@@ -16,28 +16,29 @@
 
 #pragma once
 
+#include <winrt/Windows.Foundation.Metadata.h>
+#include <winrt/Windows.UI.Xaml.Data.h>
+#include <winrt/Windows.UI.Xaml.Interop.h>
+
 namespace winsdkfb
 {
-    [Windows::Foundation::Metadata::WebHostHidden]
-    public ref class ScaleConverter sealed :
-        Windows::UI::Xaml::Data::IValueConverter
+    struct ScaleConverter : winrt::implements<ScaleConverter, winrt::Windows::UI::Xaml::Data::IValueConverter>
     {
-    public:
-        virtual Platform::Object^ Convert(
-            Platform::Object^ value,
-            Windows::UI::Xaml::Interop::TypeName targetType,
-            Platform::Object^ parameter,
-            Platform::String^ language
+        winrt::Windows::Foundation::IInspectable Convert(
+			winrt::Windows::Foundation::IInspectable const& value,
+            winrt::Windows::UI::Xaml::Interop::TypeName const& targetType,
+			winrt::Windows::Foundation::IInspectable const & parameter,
+            winrt::hstring const& language
             );
 
-        virtual Platform::Object^ ConvertBack(
-            Platform::Object^ value,
-            Windows::UI::Xaml::Interop::TypeName targetType,
-            Platform::Object^ parameter,
-            Platform::String^ language
+        winrt::Windows::Foundation::IInspectable ConvertBack(
+			winrt::Windows::Foundation::IInspectable const& value,
+            winrt::Windows::UI::Xaml::Interop::TypeName targetType,
+			winrt::Windows::Foundation::IInspectable const& parameter,
+			winrt::hstring const& language
             )
         {
-            throw ref new Platform::NotImplementedException();
+            throw winrt::hresult_not_implemented();
         }
     };
 }

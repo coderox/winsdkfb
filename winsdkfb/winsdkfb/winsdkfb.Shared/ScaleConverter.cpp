@@ -19,28 +19,29 @@
 #include <string>
 
 using namespace winsdkfb;
-using namespace Platform;
 using namespace std;
-using namespace Windows::UI::Xaml::Data;
-using namespace Windows::UI::Xaml::Interop;
+using namespace winrt;
+using namespace winrt::Windows::Foundation;
+using namespace winrt::Windows::UI::Xaml::Data;
+using namespace winrt::Windows::UI::Xaml::Interop;
 
-Object^ ScaleConverter::Convert(
-    Object^ value,
-    TypeName targetType,
-    Object^ parameter,
-    String^ language
-    )
+winrt::Windows::Foundation::IInspectable ScaleConverter::Convert(
+	winrt::Windows::Foundation::IInspectable const& value,
+	winrt::Windows::UI::Xaml::Interop::TypeName const& targetType,
+	winrt::Windows::Foundation::IInspectable const & parameter,
+	winrt::hstring const& language
+)
 {
-    if (targetType.Name != double::typeid->FullName)
+    if (targetType.Name != L"double")
     {
-        throw ref new InvalidArgumentException();
+		throw hresult_invalid_argument();
     }
 
-    double numValue = safe_cast<double>(value);
+    double numValue = winrt::unbox_value<double>(value);
 
-    String^ paramString = safe_cast<String^>(parameter);
+    hstring paramString = parameter.as<IStringable>().ToString();
 
-    double numParam = stod(wstring(paramString->Data()));
+    double numParam = stod(wstring(paramString.data()));
 
-    return numValue * numParam;
+    return box_value(numValue * numParam);
 }
