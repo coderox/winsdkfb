@@ -33,3 +33,4 @@
 #include <winrt/Windows.Foundation.Metadata.h>
 #include <winrt/Windows.UI.Xaml.Interop.h>
 #include <winrt/Windows.UI.Xaml.Data.h>
+#include <winrt/Windows.Data.Json.h>
