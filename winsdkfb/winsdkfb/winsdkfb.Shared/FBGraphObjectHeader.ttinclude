@@ -72,7 +72,7 @@ namespace winsdkfb
 <#
     }
 #>
-        public ref class <#= className #> sealed <#= interfaces #>
+        struct <#= className #> : winrt::implements<<#= className #>, winrt::Windows::Foundation::IInspectable> <#= interfaces #>
         {
             public:
 <#
@@ -85,9 +85,9 @@ namespace winsdkfb
 <#
     }
 #>
-                static Object^ FromJson(
-                    Platform::String^ JsonText 
-                    );
+                static winrt::Windows::Foundation::IInspectable FromJson(
+                    winrt::hstring const& JsonText
+                );
 
 <#
 
@@ -96,25 +96,20 @@ namespace winsdkfb
         string fullType = FullTypeFor(child);
         string propName  = PropNameFor(child);
 #>
-                property <#= fullType #> <#= propName #>
-                {
-                    <#= fullType #> get();
-                    void set(<#= fullType#> value);
-                }
+                <#= fullType #> <#= propName #>();
+                void <#= propName #>(<#= fullType#> const& value);
 
 <#
     }
 #>
             private:
-                <#= className #>(
-                    );
 
 <#
     if (bindable)
     {
 #>
                 void NotifyPropertyChanged(
-                    Platform::String^ prop
+                    winrt::hstring prop
                     );
 
 <#

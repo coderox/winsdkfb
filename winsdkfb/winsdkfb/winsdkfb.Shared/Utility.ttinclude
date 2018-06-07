@@ -90,7 +90,7 @@
 
         if (type.Equals("string"))
         {
-            result = "String^";
+            result = "hstring";
         } 
         else if (type.Equals("bool"))
         {
@@ -102,7 +102,7 @@
         }
         else if (type.Equals("fbclass"))
         {
-            result = node.Attributes["className"].Value + "^";
+            result = node.Attributes["className"].Value;
         }
 
         return result;
@@ -115,7 +115,7 @@
 
         if (rawType.Equals("string"))
         {
-            result = "Platform::";
+            result = "winrt::";
         } 
         else if (rawType.Equals("fbclass"))
         {
