@@ -16,12 +16,14 @@
 
 #pragma once
 
+#include <winrt/Windows.Foundation.h>
+
 namespace winsdkfb
 {
     /*!
      * \brief error codes.
      */
-    public enum class ErrorCode : int
+    enum ErrorCode : int
     {
         ErrorCodeOauthException = 190,
         ErrorCodeWebAccountProviderNotFound = 5000,
@@ -32,7 +34,7 @@ namespace winsdkfb
     /*!
      * \brief error subcodes.
      */
-    public enum class ErrorSubcode : int
+    enum ErrorSubcode : int
     {
         ErrorSubcodeAppNotAuthorized   = 458,
         ErrorSubcodeSessionInvalidated = 466
@@ -43,7 +45,7 @@ namespace winsdkfb
      * a very bare shell around the error response URL from Facebook, and not a
      * full-blown error class such as exists in the Facebook SDK for iOS.
      */
-    public ref class FBError sealed
+    struct FBError : winrt::implements<FBError, winrt::Windows::Foundation::IInspectable>
     {
         public:
             /**
@@ -53,8 +55,8 @@ namespace winsdkfb
              * @return FBError object encapsulating error data from the URI.
              * Will return nullptr if the URI doesn't contain an error.
              */
-            static FBError^ FromUri(
-                Windows::Foundation::Uri^ ResponseUri
+            static FBError FromUri(
+                winrt::Windows::Foundation::Uri const& ResponseUri
                 );
 
             /**
@@ -65,61 +67,43 @@ namespace winsdkfb
              * Will return nullptr if JsonText is not properly formatted JSON
              * or if it doesn't contain an error.
              */
-            static FBError^ FromJson(
-                Platform::String^ JsonText
+            static FBError FromJson(
+                winrt::hstring const& JsonText
                 );
 
             FBError(
                 int Code,
-                Platform::String^ Type,
-                Platform::String^ Message
+                winrt::hstring const& Type,
+                winrt::hstring const& Message
                 );
 
             //! Error message string
-            property Platform::String^ Message
-            {
-                Platform::String^ get();
-            }
+            winrt::hstring Message();
 
             //! Error type string
-            property Platform::String^ Type
-            {
-                Platform::String^ get();
-            }
+            winrt::hstring Type();
 
             //! Error code
-            property int Code
-            {
-                int get();
-            }
+            int Code();
 
             //! Error subcode
-            property int Subcode
-            {
-                int get();
-            }
+            int Subcode();
 
             //! Error user title
-            property Platform::String^ ErrorUserTitle
-            {
-                Platform::String^ get();
-            }
+            winrt::hstring ErrorUserTitle();
 
             //! Error user message
-            property Platform::String^ ErrorUserMessage
-            {
-                Platform::String^ get();
-            }
+            winrt::hstring ErrorUserMessage();
 
         private:
             FBError(
                 );
 
-            Platform::String^ _message;
-            Platform::String^ _type;
-            int     _code;
-            int     _subcode;
-            Platform::String^ _errorUserTitle;
-            Platform::String^ _errorUserMessage;
+            winrt::hstring	_message;
+            winrt::hstring	_type;
+            int				_code;
+            int				_subcode;
+            winrt::hstring  _errorUserTitle;
+            winrt::hstring	_errorUserMessage;
     };
 }

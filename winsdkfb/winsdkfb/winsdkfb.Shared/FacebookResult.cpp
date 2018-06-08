@@ -17,19 +17,19 @@
 #include "pch.h"
 #include "FacebookResult.h"
 
-using namespace Platform;
-using namespace Windows::Foundation;
-using namespace Windows::Foundation::Collections;
+using namespace winrt;
+using namespace winrt::Windows::Foundation;
+using namespace winrt::Windows::Foundation::Collections;
 using namespace winsdkfb;
 
 FBResult::FBResult(
-    Platform::Object^ Object
+    winrt::Windows::Foundation::IInspectable const& Object
     ) :
     _Object(nullptr),
-    _Error(nullptr)
+	_Error(nullptr)
 {
-    _Error = dynamic_cast<FBError^>(Object);
-    if (!_Error)
+    _Error = Object.try_as<FBError>();
+    if (_Error == nullptr)
     {
         // Not an error, save as our object
         _Object = Object;
@@ -42,17 +42,17 @@ FBResult::~FBResult(
     OutputDebugString(L"FBResult destructor\n");
 }
 
-bool FBResult::Succeeded::get()
+bool FBResult::Succeeded()
 {
     return (_Object != nullptr);
 }
 
-Object^ FBResult::Object::get()
+winrt::Windows::Foundation::IInspectable FBResult::Object()
 {
     return _Object;
 }
 
-FBError^ FBResult::ErrorInfo::get()
+FBError FBResult::ErrorInfo()
 {
     return _Error;
 }

@@ -19,109 +19,105 @@
 
 using namespace Platform;
 using namespace winsdkfb;
-using namespace Windows::Data::Json;
-using namespace Windows::Foundation;
-using namespace Windows::Foundation::Collections;
+using namespace winrt;
+using namespace winrt::Windows::Data::Json;
+using namespace winrt::Windows::Foundation;
+using namespace winrt::Windows::Foundation::Collections;
 
 FBError::FBError(
     ) :
-    _message(nullptr),
-    _type(nullptr),
     _code(0),
-    _subcode(0),
-    _errorUserTitle(nullptr),
-    _errorUserMessage(nullptr)
+    _subcode(0)
 {
     ;
 }
 
-String^ FBError::Message::get()
+hstring FBError::Message()
 {
     return _message;
 }
 
-String^ FBError::Type::get()
+hstring FBError::Type()
 {
     return _type;
 }
 
-int FBError::Code::get()
+int FBError::Code()
 {
     return _code;
 }
 
-int FBError::Subcode::get()
+int FBError::Subcode()
 {
     return _subcode;
 }
 
-String^ FBError::ErrorUserTitle::get()
+hstring FBError::ErrorUserTitle()
 {
     return _errorUserTitle;
 }
 
-String^ FBError::ErrorUserMessage::get()
+hstring FBError::ErrorUserMessage()
 {
     return _errorUserMessage;
 }
 
 
-FBError^ FBError::FromUri(
-    Uri^ ResponseUri
+FBError FBError::FromUri(
+    Uri const& ResponseUri
     )
 {
-    FBError^ err = nullptr;
+	FBError err;
     bool foundCode = false;
     bool foundDescription = false;
     bool foundMessage = false;
     bool foundReason = false;
     int code = 0;
-    String^ reason = nullptr;
-    String^ description = nullptr;
-    String^ message = nullptr;
-    String^ query = ResponseUri->Query;
+	hstring reason;
+    hstring description;
+    hstring message;
+    hstring query = ResponseUri.Query();
 
-    if (query && !query->IsEmpty())
+    if (!query.empty())
     {
-        WwwFormUrlDecoder^ decoder = ref new WwwFormUrlDecoder(ResponseUri->Query);
+        auto decoder = make<WwwFormUrlDecoder>(ResponseUri.Query());
 
         for (unsigned int i = 0; i < decoder->Size; i++)
         {
-            IWwwFormUrlDecoderEntry^ entry = decoder->GetAt(i);
-            if (entry->Name->Equals("error_code"))
+            IWwwFormUrlDecoderEntry entry = decoder->GetAt(i);
+            if (entry.Name() == L"error_code")
             {
                 foundCode = true;
-                code = _wtoi(entry->Value->Data());
+                code = _wtoi(entry.Value().data());
             }
-            else if (entry->Name->Equals(L"error_description"))
+            else if (entry.Name() == L"error_description")
             {
                 foundDescription = true;
-                description = entry->Value;
+                description = entry.Value();
             }
-            else if (entry->Name->Equals(L"error_message"))
+            else if (entry.Name() == L"error_message")
             {
                 foundMessage = true;
-                message = entry->Value;
+                message = entry.Value();
             }
-            else if (entry->Name->Equals(L"error_reason"))
+            else if (entry.Name() == L"error_reason")
             {
                 foundReason = true;
-                reason = entry->Value;
+                reason = entry.Value();
             }
         }
 
         if (foundCode || foundDescription || foundMessage || foundReason)
         {
-            err = ref new FBError();
-            err->_code = code;
-            err->_type = reason;
+            err._code = code;
+            err._type = reason;
             if (foundDescription)
             {
-                err->_message = description;
+                err._message = description;
             }
             else
             {
-                err->_message = message;
+                err._message = message;
             }
         }
     }
@@ -129,80 +125,65 @@ FBError^ FBError::FromUri(
     return err;
 }
 
-FBError^ FBError::FromJson(
-    String^ JsonText
-    )
+FBError FBError::FromJson(
+	hstring const& JsonText
+)
 {
-    FBError^ result = nullptr;
-    JsonValue^ val = nullptr;
-    if (JsonValue::TryParse(JsonText, &val))
-    {
-        JsonObject^ obj = val->GetObject();
-        IIterator<IKeyValuePair<String^, IJsonValue^>^>^ it = obj->First();
-        String^ key = it->Current->Key;
+	FBError result;
+	int found = 0;
+	JsonValue val{ nullptr };
 
-        if (!String::CompareOrdinal(key, L"error"))
-        {
-            obj = it->Current->Value->GetObject();
-        }
-
-        result = ref new FBError();
-        int found = 0;
-        for (it = obj->First(); it->HasCurrent; it->MoveNext())
-        {
-            key = it->Current->Key;
-            if (!String::CompareOrdinal(key, L"message"))
-            {
-                found++;
-                result->_message = it->Current->Value->GetString();
-            }
-            else if (!String::CompareOrdinal(key, L"type"))
-            {
-                found++;
-                result->_type = it->Current->Value->GetString();
-            }
-            else if (!String::CompareOrdinal(key, L"code"))
-            {
-                found++;
-                result->_code = static_cast<int>(
-                    it->Current->Value->GetNumber());
-            }
-            else if (!String::CompareOrdinal(key, L"error_subcode"))
-            {
-                found++;
-                result->_subcode = static_cast<int>(
-                    it->Current->Value->GetNumber());
-            }
-            else if (!String::CompareOrdinal(key, L"error_user_title"))
-            {
-                found++;
-                result->_errorUserTitle = it->Current->Value->GetString();
-            }
-            else if (!String::CompareOrdinal(key, L"error_user_msg"))
-            {
-                found++;
-                result->_errorUserMessage = it->Current->Value->GetString();
-            }
-        }
-
-        // If we haven't recognized any fields, this isn't an error object
-        if (!found)
-        {
-            result = nullptr;
-        }
-    }
-
-    return result;
+	if (JsonValue::TryParse(JsonText, val))
+	{
+		if (val.ValueType() == JsonValueType::Object)
+		{
+			JsonObject obj = val.GetObject();
+			for (auto&& current : obj)
+			{
+				winrt::hstring key = current.Key();
+				
+				if (key == L"message")
+				{
+					found++;
+					result._message = current.Value().GetString();
+				}
+				else if (key == L"type")
+				{
+					found++;
+					result._type = current.Value().GetString();
+				}
+				else if (key == L"code")
+				{
+					found++;
+					result._code = static_cast<int>(current.Value().GetNumber());
+				}
+				else if (key == L"error_subcode")
+				{
+					found++;
+					result._subcode = static_cast<int>(current.Value().GetNumber());
+				}
+				else if (key == L"error_user_title")
+				{
+					found++;
+					result._errorUserTitle = current.Value().GetString();
+				}
+				else if (key == L"error_user_msg")
+				{
+					found++;
+					result._errorUserMessage = current.Value().GetString();
+				}
+			}
+		}
+	}
+	return result;
 }
 
 FBError::FBError(
     int Code,
-    String^ Type,
-    String^ Message
+    hstring const& Type,
+    hstring const& Message
     ) :
     _code(Code),
-    _errorUserMessage(nullptr),
-    _errorUserTitle(nullptr),
     _message(Message),
     _subcode(0),
     _type(Type)

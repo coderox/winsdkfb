@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <winrt/Windows.Foundation.h>
 #include "FacebookError.h"
 #include "FacebookAccessTokenData.h"
 
@@ -26,7 +27,7 @@ namespace winsdkfb
      * Succeeded property. Note that the instantiation of Object and ErrorInfo
      * are exclusive to each other, only one can be instantiated at a time.
      */
-    public ref class FBResult sealed
+    class FBResult
     {
         public:
 
@@ -38,7 +39,7 @@ namespace winsdkfb
              * successful.
              */
             FBResult(
-                Platform::Object^ Object
+                winrt::Windows::Foundation::IInspectable const& Object
                 );
 
             /**
@@ -46,35 +47,26 @@ namespace winsdkfb
              * successful or not. Use to determine whether the Object or ErrorInfo
              * field should be accessed for more information.
              */
-            property bool Succeeded
-            {
-                bool get();
-            }
+            bool Succeeded();            
 
             /**
              * A context dependent object used to send additional data with the
              * FBResult. Object will need to be cast to different types depending
              * on the operation that generated it in order to be used.
              */
-            property Platform::Object^ Object
-            {
-                Platform::Object^ get();
-            }
+            winrt::Windows::Foundation::IInspectable Object();
 
             /**
              * Error information sent from the operation that created the
              * FBResult.
              */
-            property winsdkfb::FBError^ ErrorInfo
-            {
-                winsdkfb::FBError^ get();
-            }
+            winsdkfb::FBError ErrorInfo();            
 
         private:
             ~FBResult(
                 );
 
-            Platform::Object^ _Object;
-            winsdkfb::FBError^ _Error;
+			winrt::Windows::Foundation::IInspectable _Object{ nullptr };
+			winsdkfb::FBError _Error{ nullptr };
     };
 }

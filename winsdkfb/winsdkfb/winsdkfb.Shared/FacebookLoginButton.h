@@ -30,7 +30,7 @@ namespace winsdkfb
 
     public delegate void FetchedUserInfoHandler(
         FBLoginButton^ sender,
-        winsdkfb::Graph::FBUser^ userInfo
+        winsdkfb::Graph::FBUser const& userInfo
         );
 
     public delegate void ShowingLoggedInUserHandler(

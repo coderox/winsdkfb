@@ -17,6 +17,7 @@
 #pragma once
 
 #include "FacebookPermissions.h"
+#include <winrt/Windows.Foundation.h>
 
 namespace winsdkfb
 {
@@ -24,7 +25,7 @@ namespace winsdkfb
      * @brief Represents an access token used for Facebook login, with
      * associated data.
      */
-    public ref class FBAccessTokenData sealed
+    struct FBAccessTokenData
     {
         public:
             /**
@@ -33,46 +34,34 @@ namespace winsdkfb
              * @return An FBAccessTokenData representation of the URI's data, or
              * nullptr if the URI is invalid
              */
-            static FBAccessTokenData^ FromUri(
-                Windows::Foundation::Uri^ Response
+            static FBAccessTokenData FromUri(
+                winrt::Windows::Foundation::Uri const& Response
                 );
 
             FBAccessTokenData(
-                Platform::String^ AccessToken,
-                Windows::Foundation::DateTime Expiration
+                winrt::hstring const& AccessToken,
+                winrt::Windows::Foundation::DateTime const& Expiration
                 );
 
             /**
              * Access token provided by Facebook on successful login.
              */
-            property Platform::String^ AccessToken
-            {
-                Platform::String^ get();
-            }
+            winrt::hstring AccessToken();            
 
             /**
              * Expiration date of the access token.
              */
-            property Windows::Foundation::DateTime ExpirationDate
-            {
-                Windows::Foundation::DateTime get();
-            }
+            winrt::Windows::Foundation::DateTime ExpirationDate();
 
             /**
              * The permissions that were granted by the user.
              */
-            property winsdkfb::FBPermissions^ GrantedPermissions
-            {
-                winsdkfb::FBPermissions^ get();
-            }
+			winsdkfb::FBPermissions GrantedPermissions();
 
             /**
              * The permissions that were declined by the user.
              */
-            property winsdkfb::FBPermissions^ DeclinedPermissions
-            {
-                winsdkfb::FBPermissions^ get();
-            }
+            winsdkfb::FBPermissions DeclinedPermissions();
 
             /**
              * Compares the expiration time of the access token to the current time.
@@ -89,13 +78,13 @@ namespace winsdkfb
              * @param perms Collection of permissions to divide.
              */
             void SetPermissions(
-                Windows::Foundation::Collections::IVectorView<Object^>^ perms
+                winrt::Windows::Foundation::Collections::IVectorView<winrt::Windows::Foundation::IInspectable> const& perms
                 );
 
         private:
             FBAccessTokenData(
-                Platform::String^ AccessToken,
-                Platform::String^ Expiration
+                winrt::hstring const& AccessToken,
+                winrt::hstring const& Expiration
                 );
 
             /**
@@ -105,12 +94,12 @@ namespace winsdkfb
              * @param Expiration The date to convert.
              */
             void CalculateExpirationDateTime(
-                Platform::String^ Expiration
+                winrt::hstring const& Expiration
                 );
 
-            static Windows::Foundation::WwwFormUrlDecoder^
+            static winrt::Windows::Foundation::WwwFormUrlDecoder
             ParametersFromResponse(
-                Windows::Foundation::Uri^ Response
+                winrt::Windows::Foundation::Uri const& Response
                 );
 
 #ifdef _DEBUG
@@ -118,9 +107,9 @@ namespace winsdkfb
                 );
 #endif
 
-            Platform::String^ _accessToken;
-            Windows::Foundation::DateTime _expirationDate;
-            FBPermissions^ _grantedPermissions;
-            FBPermissions^ _declinedPermissions;
+            winrt::hstring _accessToken;
+            winrt::Windows::Foundation::DateTime _expirationDate;
+            FBPermissions _grantedPermissions;
+            FBPermissions _declinedPermissions;
     };
 }

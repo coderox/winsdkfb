@@ -15,35 +15,33 @@
 //******************************************************************************
 #pragma once
 
+#include <winrt/Windows.Foundation.Collections.h>
+
 namespace winsdkfb
 {
     /*!\brief Simple class to contain a set of permissions for FB.
     */
-    public ref class FBPermissions sealed
+    struct FBPermissions : winrt::implements<FBPermissions, winrt::Windows::Foundation::IStringable>
 	{
 		public:
             //! Construct an instance with a given set of permissions
             FBPermissions(
-                Windows::Foundation::Collections::IVectorView<Platform::String^>^ Permissions
+                winrt::Windows::Foundation::Collections::IVectorView<hstring> const& Permissions
                 );
 
             //! The list of permissions
-			property Windows::Foundation::Collections::IVectorView<Platform::String^>^ Values
-			{
-				Windows::Foundation::Collections::IVectorView<Platform::String^>^ get();
-			};
+			winrt::Windows::Foundation::Collections::IVectorView<winrt::hstring> Values();
 
             //! Handy override that provides a string version of permissions in
             // the format suitable for concatenating into a FB request URL.
-			virtual Platform::String^ ToString(
-				) override;
+			virtual winrt::hstring ToString();
 
             /**
              * Constructs an instance of FBPermissions
              * @param Permissions A comma seperated list of permissions
              */
-            static FBPermissions^ FromString(
-                Platform::String^ Permissions
+            static FBPermissions FromString(
+                winrt::hstring const& Permissions
                 );
 
             /**
@@ -53,13 +51,13 @@ namespace winsdkfb
              * @return a new FBPermissions object that contains the set of
              * permissions that exist in Minuend and not in Subtrahend
              */
-            static FBPermissions^ Difference(FBPermissions^ Minuend, FBPermissions^ Subtrahend);
+            static FBPermissions Difference(FBPermissions const& Minuend, FBPermissions const& Subtrahend);
 
 		private:
-            static Windows::Foundation::Collections::IVectorView<Platform::String^>^ ParsePermissionsFromString(
-                Platform::String^ Permissions
+            static winrt::Windows::Foundation::Collections::IVectorView<winrt::hstring> ParsePermissionsFromString(
+                winrt::hstring const& Permissions
                 );
 
-			Windows::Foundation::Collections::IVectorView<Platform::String^>^ _values;
+			winrt::Windows::Foundation::Collections::IVectorView<winrt::hstring> _values;
 	};
 }
