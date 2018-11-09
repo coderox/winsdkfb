@@ -56,7 +56,7 @@ IInspectable ColorLuminosityConverter::Convert(
         if (lgb != nullptr)
         {
             GradientStopCollection gradientStops;
-			for(auto stop : lgb.GradientStops())
+			for(auto && stop : lgb.GradientStops())
             {
                 //GradientStop^ stop = iter->Current;
                 GradientStop newStop;
