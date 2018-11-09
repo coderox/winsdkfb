@@ -60,13 +60,13 @@ namespace winsdkfb
              * Error information sent from the operation that created the
              * FBResult.
              */
-            winsdkfb::FBError ErrorInfo();            
+            std::shared_ptr<winsdkfb::FBError> ErrorInfo();            
 
         private:
             ~FBResult(
                 );
 
 			winrt::Windows::Foundation::IInspectable _Object{ nullptr };
-			winsdkfb::FBError _Error{ nullptr };
+			std::shared_ptr<winsdkfb::FBError> _Error;
     };
 }

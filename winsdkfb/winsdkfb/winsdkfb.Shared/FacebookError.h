@@ -20,90 +20,89 @@
 
 namespace winsdkfb
 {
-    /*!
-     * \brief error codes.
-     */
-    enum ErrorCode : int
-    {
-        ErrorCodeOauthException = 190,
-        ErrorCodeWebAccountProviderNotFound = 5000,
-        ErrorCodeWebTokenRequestStatus = 5001,
-        ErrorCodeWebAccountProviderNotSupported = 5002,
-    };
+	/*!
+	 * \brief error codes.
+	 */
+	enum ErrorCode : int
+	{
+		ErrorCodeOauthException = 190,
+		ErrorCodeWebAccountProviderNotFound = 5000,
+		ErrorCodeWebTokenRequestStatus = 5001,
+		ErrorCodeWebAccountProviderNotSupported = 5002,
+	};
 
-    /*!
-     * \brief error subcodes.
-     */
-    enum ErrorSubcode : int
-    {
-        ErrorSubcodeAppNotAuthorized   = 458,
-        ErrorSubcodeSessionInvalidated = 466
-    };
+	/*!
+	 * \brief error subcodes.
+	 */
+	enum ErrorSubcode : int
+	{
+		ErrorSubcodeAppNotAuthorized = 458,
+		ErrorSubcodeSessionInvalidated = 466
+	};
 
-    /*!
-     * \brief class wrapper for FB error responses. For the time being, this is
-     * a very bare shell around the error response URL from Facebook, and not a
-     * full-blown error class such as exists in the Facebook SDK for iOS.
-     */
-    struct FBError : winrt::implements<FBError, winrt::Windows::Foundation::IInspectable>
-    {
-        public:
-            /**
-             * Tries to instantiate an FBError object based off of a response
-             * URI from Facebook.
-             * @param ResponseUri Response URI to extract error information from.
-             * @return FBError object encapsulating error data from the URI.
-             * Will return nullptr if the URI doesn't contain an error.
-             */
-            static FBError FromUri(
-                winrt::Windows::Foundation::Uri const& ResponseUri
-                );
+	/*!
+	 * \brief class wrapper for FB error responses. For the time being, this is
+	 * a very bare shell around the error response URL from Facebook, and not a
+	 * full-blown error class such as exists in the Facebook SDK for iOS.
+	 */
+	struct FBError : winrt::implements<FBError, winrt::Windows::Foundation::IInspectable>
+	{
+		FBError();
 
-            /**
-             * Tries to instantiate an FBError object from a JSON formatted
-             * string.
-             * @param JsonText JSON string to extract error information from.
-             * @return FBError object encapsulating the JSON string error data.
-             * Will return nullptr if JsonText is not properly formatted JSON
-             * or if it doesn't contain an error.
-             */
-            static FBError FromJson(
-                winrt::hstring const& JsonText
-                );
+		/**
+		 * Tries to instantiate an FBError object based off of a response
+		 * URI from Facebook.
+		 * @param ResponseUri Response URI to extract error information from.
+		 * @return FBError object encapsulating error data from the URI.
+		 * Will return nullptr if the URI doesn't contain an error.
+		 */
+		static std::shared_ptr<FBError> FromUri(
+			winrt::Windows::Foundation::Uri const& ResponseUri
+		);
 
-            FBError(
-                int Code,
-                winrt::hstring const& Type,
-                winrt::hstring const& Message
-                );
+		/**
+		 * Tries to instantiate an FBError object from a JSON formatted
+		 * string.
+		 * @param JsonText JSON string to extract error information from.
+		 * @return FBError object encapsulating the JSON string error data.
+		 * Will return nullptr if JsonText is not properly formatted JSON
+		 * or if it doesn't contain an error.
+		 */
+		static std::shared_ptr<FBError> FromJson(
+			winrt::hstring const& JsonText
+		);
 
-            //! Error message string
-            winrt::hstring Message();
+		FBError(
+			int Code,
+			winrt::hstring const& Type,
+			winrt::hstring const& Message
+		);
 
-            //! Error type string
-            winrt::hstring Type();
+		//! Error message string
+		winrt::hstring Message();
 
-            //! Error code
-            int Code();
+		//! Error type string
+		winrt::hstring Type();
 
-            //! Error subcode
-            int Subcode();
+		//! Error code
+		int Code();
 
-            //! Error user title
-            winrt::hstring ErrorUserTitle();
+		//! Error subcode
+		int Subcode();
 
-            //! Error user message
-            winrt::hstring ErrorUserMessage();
+		//! Error user title
+		winrt::hstring ErrorUserTitle();
 
-        private:
-            FBError(
-                );
+		//! Error user message
+		winrt::hstring ErrorUserMessage();
 
-            winrt::hstring	_message;
-            winrt::hstring	_type;
-            int				_code;
-            int				_subcode;
-            winrt::hstring  _errorUserTitle;
-            winrt::hstring	_errorUserMessage;
-    };
+	private:
+
+		winrt::hstring	_message;
+		winrt::hstring	_type;
+		int				_code;
+		int				_subcode;
+		winrt::hstring  _errorUserTitle;
+		winrt::hstring	_errorUserMessage;
+	};
 }

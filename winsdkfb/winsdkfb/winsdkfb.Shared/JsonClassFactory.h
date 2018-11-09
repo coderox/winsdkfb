@@ -20,7 +20,5 @@
 
 namespace winsdkfb
 {
-    public delegate Platform::Object^ FBJsonClassFactory(
-        Platform::String^ JsonText
-        );
+	delegate<winrt::Windows::Foundation::IInspectable, winrt::hstring> FBJsonClassFactory;
 }

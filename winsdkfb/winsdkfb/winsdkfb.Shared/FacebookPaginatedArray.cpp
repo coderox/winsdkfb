@@ -23,11 +23,9 @@
 
 #include <regex>
 
-using namespace concurrency;
 using namespace winsdkfb;
 using namespace winsdkfb::Graph;
-using namespace Platform;
-using namespace Platform::Collections;
+using namespace winrt;
 using namespace Windows::Data::Json;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
@@ -35,9 +33,9 @@ using namespace Windows::Web::Http;
 using namespace Windows::Web::Http::Filters;
 
 FBPaginatedArray::FBPaginatedArray(
-    Platform::String^ Request,
-    PropertySet^ Parameters,
-    winsdkfb::FBJsonClassFactory^ ObjectFactory
+    hstring Request,
+    PropertySet Parameters,
+    winsdkfb::FBJsonClassFactory ObjectFactory
     ) :
     _current(nullptr),
     _request(Request),

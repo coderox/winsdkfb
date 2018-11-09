@@ -28,7 +28,7 @@ namespace winsdkfb
          * Used to interact with Facebook Graph API calls that return
          * paginated values.
          */
-        public ref class FBPaginatedArray sealed
+        struct FBPaginatedArray : winrt::implements<FBPaginatedArray, winrt::Windows::Foundation::IInspectable>
         {
         public:
             /**

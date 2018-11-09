@@ -17,7 +17,6 @@
 #include "pch.h"
 #include "FacebookError.h"
 
-using namespace Platform;
 using namespace winsdkfb;
 using namespace winrt;
 using namespace winrt::Windows::Data::Json;
@@ -63,11 +62,11 @@ hstring FBError::ErrorUserMessage()
 }
 
 
-FBError FBError::FromUri(
+std::shared_ptr<FBError> FBError::FromUri(
     Uri const& ResponseUri
     )
 {
-	FBError err;
+	auto err = std::make_shared<FBError>();
     bool foundCode = false;
     bool foundDescription = false;
     bool foundMessage = false;
@@ -80,11 +79,11 @@ FBError FBError::FromUri(
 
     if (!query.empty())
     {
-        auto decoder = make<WwwFormUrlDecoder>(ResponseUri.Query());
+        auto decoder = WwwFormUrlDecoder(ResponseUri.Query());
 
-        for (unsigned int i = 0; i < decoder->Size; i++)
+        for (unsigned int i = 0; i < decoder.Size(); i++)
         {
-            IWwwFormUrlDecoderEntry entry = decoder->GetAt(i);
+            IWwwFormUrlDecoderEntry entry = decoder.GetAt(i);
             if (entry.Name() == L"error_code")
             {
                 foundCode = true;
@@ -109,15 +108,15 @@ FBError FBError::FromUri(
 
         if (foundCode || foundDescription || foundMessage || foundReason)
         {
-            err._code = code;
-            err._type = reason;
+            err->_code = code;
+            err->_type = reason;
             if (foundDescription)
             {
-                err._message = description;
+                err->_message = description;
             }
             else
             {
-                err._message = message;
+                err->_message = message;
             }
         }
     }
@@ -125,11 +124,11 @@ FBError FBError::FromUri(
     return err;
 }
 
-FBError FBError::FromJson(
+std::shared_ptr<FBError> FBError::FromJson(
 	hstring const& JsonText
 )
 {
-	FBError result;
+	auto result = std::make_shared<FBError>();
 	int found = 0;
 	JsonValue val{ nullptr };
 
@@ -145,32 +144,32 @@ FBError FBError::FromJson(
 				if (key == L"message")
 				{
 					found++;
-					result._message = current.Value().GetString();
+					result->_message = current.Value().GetString();
 				}
 				else if (key == L"type")
 				{
 					found++;
-					result._type = current.Value().GetString();
+					result->_type = current.Value().GetString();
 				}
 				else if (key == L"code")
 				{
 					found++;
-					result._code = static_cast<int>(current.Value().GetNumber());
+					result->_code = static_cast<int>(current.Value().GetNumber());
 				}
 				else if (key == L"error_subcode")
 				{
 					found++;
-					result._subcode = static_cast<int>(current.Value().GetNumber());
+					result->_subcode = static_cast<int>(current.Value().GetNumber());
 				}
 				else if (key == L"error_user_title")
 				{
 					found++;
-					result._errorUserTitle = current.Value().GetString();
+					result->_errorUserTitle = current.Value().GetString();
 				}
 				else if (key == L"error_user_msg")
 				{
 					found++;
-					result._errorUserMessage = current.Value().GetString();
+					result->_errorUserMessage = current.Value().GetString();
 				}
 			}
 		}

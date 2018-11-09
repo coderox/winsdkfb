@@ -26,7 +26,7 @@ namespace winsdkfb
 		public:
             //! Construct an instance with a given set of permissions
             FBPermissions(
-                winrt::Windows::Foundation::Collections::IVectorView<hstring> const& Permissions
+                winrt::Windows::Foundation::Collections::IVectorView<winrt::hstring> const& Permissions
                 );
 
             //! The list of permissions

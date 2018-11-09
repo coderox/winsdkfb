@@ -23,12 +23,11 @@ using namespace winrt::Windows::Foundation::Collections;
 using namespace winsdkfb;
 
 FBResult::FBResult(
-    winrt::Windows::Foundation::IInspectable const& Object
+    IInspectable const& Object
     ) :
-    _Object(nullptr),
-	_Error(nullptr)
+    _Object(nullptr)
 {
-    _Error = Object.try_as<FBError>();
+	_Error = Object.as<FBError>();
     if (_Error == nullptr)
     {
         // Not an error, save as our object
@@ -52,7 +51,7 @@ winrt::Windows::Foundation::IInspectable FBResult::Object()
     return _Object;
 }
 
-FBError FBResult::ErrorInfo()
+std::shared_ptr<FBError> FBResult::ErrorInfo()
 {
     return _Error;
 }
