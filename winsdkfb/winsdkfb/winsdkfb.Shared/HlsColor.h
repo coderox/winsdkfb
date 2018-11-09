@@ -14,22 +14,18 @@
 //
 //******************************************************************************
 
+#include <winrt/Windows.UI.h>
+
 namespace winsdkfb
 {
-    ref class HlsColor sealed
+    struct HlsColor 
     {
     public:
-        property Windows::UI::Color RgbValue
-        {
-            Windows::UI::Color get();
-            void set(Windows::UI::Color value);
-        }
+		winrt::Windows::UI::Color RgbValue();
+		void RgbValue(winrt::Windows::UI::Color const& value);
 
-        property double Luminosity
-        {
-            double get();
-            void set(double value);
-        }
+		double Luminosity();
+		void Luminosity(double value);
 
     private:
         double TransformColor(

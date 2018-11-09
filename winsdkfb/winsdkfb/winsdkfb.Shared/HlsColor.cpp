@@ -18,12 +18,11 @@
 #include "HlsColor.h"
 
 using namespace winsdkfb;
-using namespace Platform;
 using namespace std;
-using namespace Windows::UI;
+using namespace winrt::Windows::UI;
 
 
-Color HlsColor::RgbValue::get(
+Color HlsColor::RgbValue(
     )
 {
     Color result;
@@ -69,8 +68,8 @@ Color HlsColor::RgbValue::get(
     return result;
 }
 
-void HlsColor::RgbValue::set(
-    Color value
+void HlsColor::RgbValue(
+    Color const& value
     )
 {
     double red = value.R / 255.0;
@@ -123,13 +122,13 @@ void HlsColor::RgbValue::set(
     }
 }
 
-double HlsColor::Luminosity::get(
+double HlsColor::Luminosity(
     )
 {
     return _L;
 }
 
-void HlsColor::Luminosity::set(
+void HlsColor::Luminosity(
     double value
     )
 {
