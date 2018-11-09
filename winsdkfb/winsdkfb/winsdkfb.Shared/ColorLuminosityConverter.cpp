@@ -20,58 +20,55 @@
 #include <string>
 
 using namespace winsdkfb;
-using namespace Platform;
+using namespace winrt;
 using namespace std;
+using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::UI;
 using namespace Windows::UI::Xaml::Data;
 using namespace Windows::UI::Xaml::Interop;
 using namespace Windows::UI::Xaml::Media;
 
-Object^ ColorLuminosityConverter::Convert(
-    Object^ value,
-    TypeName targetType,
-    Object^ parameter,
-    String^ language
+IInspectable ColorLuminosityConverter::Convert(
+	IInspectable const& value,
+	TypeName const& targetType,
+	IInspectable const & parameter,
+	hstring const& language
     )
 {
-    String^ paramString = safe_cast<String^>(parameter);
-    double factor = stod(wstring(paramString->Data()));
-    Object^ result = nullptr;
-    HlsColor^ hlsColor = ref new HlsColor();
+    hstring paramString = parameter.as<IPropertyValue>().GetString();
+    double factor = stod(wstring(paramString.data()));
+    IInspectable result = nullptr;
+	HlsColor hlsColor;
 
-    SolidColorBrush^ scb = dynamic_cast<SolidColorBrush^>(value);
+    SolidColorBrush scb = value.as<SolidColorBrush>();
     if (scb != nullptr)
     {
-        Color brushColor = scb->Color;
-        hlsColor->RgbValue = brushColor;
-        hlsColor->Luminosity *= factor;
-        Color newColor = hlsColor->RgbValue;
-        result = ref new SolidColorBrush(newColor);
+        Color brushColor = scb.Color();
+        hlsColor.RgbValue(brushColor);
+        hlsColor.Luminosity(hlsColor.Luminosity() * factor);
+        Color newColor = hlsColor.RgbValue();
+        result = SolidColorBrush(newColor);
     }
     else 
     {
-        LinearGradientBrush^ lgb = dynamic_cast<LinearGradientBrush^>(value);
+        LinearGradientBrush lgb = value.as<LinearGradientBrush>();
         if (lgb != nullptr)
         {
-            GradientStopCollection^ gradientStops =
-                ref new GradientStopCollection();
-
-            IIterator<GradientStop^>^ iter = nullptr;
-            for (iter = lgb->GradientStops->First(); iter->HasCurrent;
-                iter->MoveNext())
+            GradientStopCollection gradientStops;
+			for(auto stop : lgb.GradientStops())
             {
-                GradientStop^ stop = iter->Current;
-                GradientStop^ newStop = ref new GradientStop();
+                //GradientStop^ stop = iter->Current;
+                GradientStop newStop;
 
-                hlsColor->RgbValue = stop->Color;
-                hlsColor->Luminosity *= factor;
-                newStop->Color = hlsColor->RgbValue;
-                newStop->Offset = stop->Offset;
-                gradientStops->Append(newStop);
+                hlsColor.RgbValue(stop.Color());
+                hlsColor.Luminosity(hlsColor.Luminosity() * factor);
+                newStop.Color(hlsColor.RgbValue());
+                newStop.Offset(stop.Offset());
+                gradientStops.Append(newStop);
             }
 
-            result = ref new LinearGradientBrush(gradientStops, 0.0);
+            result = LinearGradientBrush(gradientStops, 0.0);
         }
     }
 

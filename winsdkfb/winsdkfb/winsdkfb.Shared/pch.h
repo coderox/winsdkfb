@@ -23,10 +23,8 @@
  */
 #pragma once
 
-#include <collection.h>
-#include <ppltasks.h>
 #include "FBConstants.h"
-#include "FacebookLoginButton.h"
+//#include "FacebookLoginButton.h"
 #include "ScaleConverter.h"
 #include "ColorLuminosityConverter.h"
 

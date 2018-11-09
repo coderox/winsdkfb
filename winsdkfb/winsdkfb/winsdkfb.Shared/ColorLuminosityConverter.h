@@ -16,29 +16,30 @@
 
 #pragma once
 
+#include <winrt/Windows.Foundation.Metadata.h>
+#include <winrt/Windows.UI.Xaml.Data.h>
+#include <winrt/Windows.UI.Xaml.Interop.h>
+
 namespace winsdkfb
 {
-    [Windows::Foundation::Metadata::WebHostHidden]
-    public ref class ColorLuminosityConverter sealed :
-        Windows::UI::Xaml::Data::IValueConverter
-    {
-    public:
-        virtual Platform::Object^ Convert(
-            Platform::Object^ value,
-            Windows::UI::Xaml::Interop::TypeName targetType,
-            Platform::Object^ parameter,
-            Platform::String^ language
-            );
+	struct ColorLuminosityConverter : winrt::implements<ColorLuminosityConverter, winrt::Windows::UI::Xaml::Data::IValueConverter>
+	{
+		winrt::Windows::Foundation::IInspectable Convert(
+			winrt::Windows::Foundation::IInspectable const& value,
+			winrt::Windows::UI::Xaml::Interop::TypeName const& targetType,
+			winrt::Windows::Foundation::IInspectable const & parameter,
+			winrt::hstring const& language
+		);
 
-        virtual Platform::Object^ ConvertBack(
-            Platform::Object^ value,
-            Windows::UI::Xaml::Interop::TypeName targetType,
-            Platform::Object^ parameter,
-            Platform::String^ language
-            )
-        {
-            throw ref new Platform::NotImplementedException();
-        }
-    };
+		winrt::Windows::Foundation::IInspectable ConvertBack(
+			winrt::Windows::Foundation::IInspectable const& value,
+			winrt::Windows::UI::Xaml::Interop::TypeName targetType,
+			winrt::Windows::Foundation::IInspectable const& parameter,
+			winrt::hstring const& language
+		)
+		{
+			throw winrt::hresult_not_implemented();
+		}
+	};
 }
 
