@@ -1,6 +1,30 @@
 @echo off
 setlocal
 
+REM Add TextTransform to our path based on the default location for VS2017
+set _TT=%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\
+set PATH=%_TT%;%PATH%;
+
+REM Verify that we can find TextTransform
+where /q TextTransform.exe
+if "%ErrorLevel%" == "0" goto :Found
+
+REM Add TextTransform to our path based on the default location for VS2017
+set _TT=%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Professional\Common7\IDE\
+set PATH=%_TT%;%PATH%;
+
+REM Verify that we can find TextTransform
+where /q TextTransform.exe
+if "%ErrorLevel%" == "0" goto :Found
+
+REM Add TextTransform to our path based on the default location for VS2017
+set _TT=%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Community\Common7\IDE\
+set PATH=%_TT%;%PATH%;
+
+REM Verify that we can find TextTransform
+where /q TextTransform.exe
+if "%ErrorLevel%" == "0" goto :Found
+
 REM Add TextTransform to our path based on the default location for VS2015
 set _TT=%CommonProgramFiles(x86)%\Microsoft Shared\TextTemplating\14.0
 set PATH=%_TT%;%PATH%;
