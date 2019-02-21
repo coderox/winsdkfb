@@ -43,6 +43,12 @@ namespace winsdkfb
 				Windows::Foundation::DateTime DataAccessExpiration
                 );
 
+			FBAccessTokenData(
+				Platform::String^ AccessToken,
+				Platform::String^ Expiration,
+				Platform::String^ DataAccessExpiration
+			);
+
             /**
              * Access token provided by Facebook on successful login.
              */
@@ -118,12 +124,6 @@ namespace winsdkfb
                 );
 
         private:
-            FBAccessTokenData(
-                Platform::String^ AccessToken,
-                Platform::String^ Expiration,
-				Platform::String^ DataAccessExpiration
-                );
-
             /**
              * Converts expiration string to DateTime object that indicates when
              * the access token will expire. This value may be accessed via

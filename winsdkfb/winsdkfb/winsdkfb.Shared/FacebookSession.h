@@ -264,6 +264,10 @@ namespace winsdkfb
             Windows::Foundation::IAsyncOperation<FBResult^>^ TryRefreshAccessToken(
                 );
 
+			Windows::Foundation::IAsyncOperation<FBResult^>^ ReauthorizeAsync(
+				winsdkfb::FBPermissions^ Permissions
+			);
+
         private:
             FBSession();
 
@@ -380,6 +384,10 @@ namespace winsdkfb
             BOOL IsRerequest(
                 Windows::Foundation::Collections::PropertySet^ Parameters
                 );
+
+			BOOL IsReauthorize(
+				Windows::Foundation::Collections::PropertySet^ Parameters
+			);
 
             Platform::String^ _FBAppId;
             Platform::String^ _WinAppId;

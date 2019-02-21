@@ -74,6 +74,7 @@ extern const wchar_t* ErrorObjectJson;
 #define DefaultResponse L"token"
 #define AuthTypeKey     L"auth_type"
 #define Rerequest       L"rerequest"
+#define	Reauthorize     L"reauthorize"
 #define RedirectUriKey  L"redirect_uri"
 
 #define SDK_APP_DATA_CONTAINER "winsdkfb"
@@ -334,19 +335,39 @@ task<FBResult^> FBSession::CheckForExistingToken(
 
                     if (pos != wstring::npos)
                     {
-                        String^ accessToken = ref new String(vals.substr(0, pos).c_str());
-                        String^ expirationString = ref new String(vals.substr(pos + 1, wstring::npos).c_str());
-                        DateTime expirationTime;
+						DateTime expirationTime;
 						DateTime dataAccessExpirationTime;
+						String^ dataAccessExpirationString;
+                        String^ accessToken = ref new String(vals.substr(0, pos).c_str());
+						String^ msg = L"Access Token: " + accessToken + L"\n";
+						OutputDebugString(msg->Data());
 
-                        String^ msg = L"Access Token: " + accessToken + L"\n";
-                        OutputDebugString(msg->Data());
+						size_t nextPos = vals.find(L",", pos + 1);
+						String^ expirationString = ref new String(vals.substr(pos + 1, nextPos - (pos + 1)).c_str());
+						msg = L"Expiration: " + expirationString + L"\n";
+						OutputDebugString(msg->Data());
 
-                        expirationTime.UniversalTime = _wtoi64(expirationString->Data());
-                        
-						winsdkfb::FBAccessTokenData^ cachedData =
-                            ref new winsdkfb::FBAccessTokenData(
-                                accessToken, expirationTime, dataAccessExpirationTime);
+						if (nextPos != wstring::npos)
+						{
+							dataAccessExpirationString = ref new String(vals.substr(nextPos + 1, wstring::npos).c_str());
+						}
+
+						winsdkfb::FBAccessTokenData^ cachedData = nullptr;
+						if (expirationString != "0") {
+							expirationTime.UniversalTime = _wtoi64(expirationString->Data());
+							if (dataAccessExpirationString != "0") {
+								dataAccessExpirationTime.UniversalTime = _wtoi64(dataAccessExpirationString->Data());
+							}
+							cachedData =
+								ref new winsdkfb::FBAccessTokenData(
+									accessToken, expirationTime, dataAccessExpirationTime);
+						}
+						else {
+							cachedData =
+								ref new winsdkfb::FBAccessTokenData(
+									accessToken, expirationString, dataAccessExpirationString);
+						}
+
                         cachedResult = ref new FBResult(cachedData);
                     }
                 }
@@ -371,8 +392,21 @@ void FBSession::TrySaveTokenData(
             _i64tow_s(
                 this->AccessTokenData->ExpirationDate.UniversalTime,
                     buffer, INT64_STRING_BUFSIZE, 10);
-            String^ tokenData = this->AccessTokenData->AccessToken +
-                "," + ref new String(buffer);
+			String^ tokenData;
+			if(this->AccessTokenData->HasDataAccessExpirationDate()) {
+				wchar_t daBuffer[INT64_STRING_BUFSIZE];
+				_i64tow_s(
+					this->AccessTokenData->DataAccessExpirationDate.UniversalTime,
+					daBuffer, INT64_STRING_BUFSIZE, 10);
+				tokenData = this->AccessTokenData->AccessToken +
+					"," + ref new String(buffer) +
+					"," + ref new String(daBuffer);
+			}
+			else {
+				tokenData = this->AccessTokenData->AccessToken +
+					"," + ref new String(buffer) +
+					",0";
+			}
             IBuffer^ dataBuff =
                 CryptographicBuffer::ConvertStringToBinary(tokenData,
                     BinaryStringEncoding::Utf16LE);
@@ -608,6 +642,8 @@ task<FBResult^> FBSession::ShowLoginDialog(
         return result;
     });
 }
+
+
 
 #if defined(_WIN32_WINNT_WIN10) && (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
 
@@ -1086,6 +1122,68 @@ IAsyncOperation<FBResult^>^ FBSession::LoginAsync(
     });
 }
 
+IAsyncOperation<FBResult^>^ FBSession::ReauthorizeAsync(
+	FBPermissions^ Permissions
+)
+{
+	if (!Permissions)
+	{
+		Permissions = ref new FBPermissions((ref new Vector<String^>())->GetView());
+	}
+
+	return create_async([=]()
+		{
+			PropertySet^ parameters = ref new PropertySet();
+			parameters->Insert(ScopeKey, Permissions->ToString());
+
+			if (LoggedIn)
+			{
+				parameters->Insert(AuthTypeKey, Reauthorize);
+			}
+
+			return create_task([=]() -> FBResult^
+				{
+					task<FBResult^> authTask = TryLoginViaWebView(parameters);
+					FBResult^ result = authTask.get();
+					return result;
+				})
+				.then([this](FBResult^ graphResult) -> task<FBResult^>
+					{
+						return TryGetUserInfoAfterLogin(graphResult);
+					})
+					.then([this](FBResult^ userInfoResult) -> task<FBResult^>
+						{
+							return TryGetAppPermissionsAfterLogin(userInfoResult);
+						})
+						.then([=](FBResult^ finalResult)
+							{
+								if (finalResult != nullptr && finalResult->Succeeded)
+								{
+									SaveGrantedPermissions();
+								}
+								return finalResult;
+							})
+							.then([=](FBResult^ finalResult)
+								{
+									if (finalResult == nullptr || !finalResult->Succeeded)
+									{
+										_loggedIn = false;
+										AccessTokenData = nullptr;
+									}
+									if (finalResult == nullptr)
+									{
+										finalResult = ref new FBResult(ref new FBError(0, L"Unexpected error", L"Reauthorize attempt failed"));
+#ifdef DEBUG
+										OutputDebugString(L"ReauthoirzeAsync was about to return nullptr, created FBResult object to return instead");
+#endif
+									}
+
+									return finalResult;
+								});
+		});
+}
+
+
 task<FBResult^> FBSession::TryLoginViaWebView(
     PropertySet^ Parameters
     )
@@ -1099,7 +1197,7 @@ task<FBResult^> FBSession::TryLoginViaWebView(
             return nullptr;
         });
 
-        if (!IsRerequest(Parameters))
+        if (!IsRerequest(Parameters) && !IsReauthorize(Parameters))
         {
             graphTask = CheckForExistingToken();
         }
@@ -1161,7 +1259,7 @@ task<FBResult^> FBSession::TryLoginViaWebAuthBroker(
             return nullptr;
         });
 
-        if (!IsRerequest(Parameters))
+        if (!IsRerequest(Parameters) && ! IsReauthorize(Parameters))
         {
             graphTask = CheckForExistingToken();
         }
@@ -1302,6 +1400,25 @@ BOOL FBSession::IsRerequest(
     }
 
     return isRerequest;
+}
+
+BOOL FBSession::IsReauthorize(
+	PropertySet^ Parameters
+)
+{
+	BOOL isReauthorize = FALSE;
+
+	if (Parameters && Parameters->HasKey(AuthTypeKey))
+	{
+		String^ Value = static_cast<String^>(Parameters->Lookup(AuthTypeKey));
+
+		if (!String::CompareOrdinal(Value, Reauthorize))
+		{
+			isReauthorize = TRUE;
+		}
+	}
+
+	return isReauthorize;
 }
 
 void FBSession::SetAPIVersion(
