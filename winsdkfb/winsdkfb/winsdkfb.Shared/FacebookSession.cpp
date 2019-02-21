@@ -337,14 +337,16 @@ task<FBResult^> FBSession::CheckForExistingToken(
                         String^ accessToken = ref new String(vals.substr(0, pos).c_str());
                         String^ expirationString = ref new String(vals.substr(pos + 1, wstring::npos).c_str());
                         DateTime expirationTime;
+						DateTime dataAccessExpirationTime;
 
                         String^ msg = L"Access Token: " + accessToken + L"\n";
                         OutputDebugString(msg->Data());
 
                         expirationTime.UniversalTime = _wtoi64(expirationString->Data());
-                        winsdkfb::FBAccessTokenData^ cachedData =
+                        
+						winsdkfb::FBAccessTokenData^ cachedData =
                             ref new winsdkfb::FBAccessTokenData(
-                                accessToken, expirationTime);
+                                accessToken, expirationTime, dataAccessExpirationTime);
                         cachedResult = ref new FBResult(cachedData);
                     }
                 }
@@ -1564,7 +1566,7 @@ FBResult^ FBSession::ExtractAccessTokenDataFromResponseData(
         long long minimumExpiryInTicks = now.UniversalTime + _90_MINUTES_IN_TICKS;
         DateTime expiration;
         expiration.UniversalTime = minimumExpiryInTicks;
-        FBAccessTokenData^ token = ref new FBAccessTokenData(response->Token, expiration);
+        FBAccessTokenData^ token = ref new FBAccessTokenData(response->Token, expiration, expiration);
 
         result = ref new FBResult(token);
 

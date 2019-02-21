@@ -194,6 +194,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\FBWinStoreCppTests\LoginTests.cpp" />
+    <ClCompile Include="FBAccessTokenDataTests.cpp" />
     <ClCompile Include="UnitTestApp.xaml.cpp">
       <DependentUpon>UnitTestApp.xaml</DependentUpon>
     </ClCompile>

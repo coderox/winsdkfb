@@ -39,7 +39,8 @@ namespace winsdkfb
 
             FBAccessTokenData(
                 Platform::String^ AccessToken,
-                Windows::Foundation::DateTime Expiration
+                Windows::Foundation::DateTime Expiration,
+				Windows::Foundation::DateTime DataAccessExpiration
                 );
 
             /**
@@ -57,6 +58,14 @@ namespace winsdkfb
             {
                 Windows::Foundation::DateTime get();
             }
+
+			/**
+			 * Expiration date of the data access permissions.
+			 */
+			property Windows::Foundation::DateTime DataAccessExpirationDate
+			{
+				Windows::Foundation::DateTime get();
+			}
 
             /**
              * The permissions that were granted by the user.
@@ -81,6 +90,22 @@ namespace winsdkfb
             bool IsExpired(
                 );
 
+			/**
+			 * Compares the data access expiration time of the access token to the current time.
+			 * @return true if the data access permissions is expired, false otherwise.
+			 */
+			bool IsDataAccessExpired(
+			);
+
+			/**
+			 * Since older tokens didn't have Data Access Expiration, we need to expose that
+			 * @return true if the token has a data access expiration date, false otherwise.
+			 */
+			bool HasDataAccessExpirationDate(
+			) {
+				return _hasDataAccessExpirationDate;
+			}
+
             /**
              * Splits permissions into granted and declined groups then stores
              * these as GrantedPermissions and DeclinedPermissions,
@@ -95,7 +120,8 @@ namespace winsdkfb
         private:
             FBAccessTokenData(
                 Platform::String^ AccessToken,
-                Platform::String^ Expiration
+                Platform::String^ Expiration,
+				Platform::String^ DataAccessExpiration
                 );
 
             /**
@@ -107,6 +133,16 @@ namespace winsdkfb
             void CalculateExpirationDateTime(
                 Platform::String^ Expiration
                 );
+
+			/**
+			 * Converts data access expiration string to DateTime object that indicates when
+			 * the data access permissions will expire. This value may be accessed via
+			 * DataAccessExpirationDate.
+			 * @param DataAccessExpiration The date to convert.
+			 */
+			void CalculateDataAccessExpirationDateTime(
+				Platform::String^ DataAccessExpiration
+			);
 
             static Windows::Foundation::WwwFormUrlDecoder^
             ParametersFromResponse(
@@ -120,7 +156,9 @@ namespace winsdkfb
 
             Platform::String^ _accessToken;
             Windows::Foundation::DateTime _expirationDate;
+			Windows::Foundation::DateTime _dataAccessExpirationDate;
             FBPermissions^ _grantedPermissions;
             FBPermissions^ _declinedPermissions;
+			bool _hasDataAccessExpirationDate;
     };
 }

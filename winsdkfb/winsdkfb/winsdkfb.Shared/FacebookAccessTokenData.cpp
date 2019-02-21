@@ -34,16 +34,24 @@ using namespace std;
 
 FBAccessTokenData::FBAccessTokenData(
     String^ AccessToken,
-    String^ Expiration
+    String^ Expiration,
+	String^ DataAccessExpiration
     ) :
     _accessToken(AccessToken),
     _grantedPermissions(nullptr),
-    _declinedPermissions(nullptr)
+    _declinedPermissions(nullptr),
+	_hasDataAccessExpirationDate(false)
 {
     if (Expiration)
     {
         CalculateExpirationDateTime(Expiration);
     }
+
+	if (DataAccessExpiration)
+	{
+		CalculateDataAccessExpirationDateTime(DataAccessExpiration);
+	}
+
 #ifdef _DEBUG
     DebugPrintExpirationTime();
 #endif
@@ -51,12 +59,15 @@ FBAccessTokenData::FBAccessTokenData(
 
 FBAccessTokenData::FBAccessTokenData(
     String^ AccessToken,
-    DateTime Expiration
+    DateTime Expiration,
+	DateTime DataAccessExpiration
     ) :
     _accessToken(AccessToken),
     _grantedPermissions(nullptr),
     _declinedPermissions(nullptr),
-    _expirationDate(Expiration)
+    _expirationDate(Expiration),
+	_dataAccessExpirationDate(DataAccessExpiration),
+	_hasDataAccessExpirationDate(true)
 {
 #ifdef _DEBUG
     DebugPrintExpirationTime();
@@ -74,6 +85,11 @@ String^ FBAccessTokenData::AccessToken::get()
 DateTime FBAccessTokenData::ExpirationDate::get()
 {
     return _expirationDate;
+}
+
+DateTime FBAccessTokenData::DataAccessExpirationDate::get()
+{
+	return _dataAccessExpirationDate;
 }
 
 FBPermissions^ FBAccessTokenData::GrantedPermissions::get()
@@ -136,8 +152,10 @@ FBAccessTokenData^ FBAccessTokenData::FromUri(
 {
     bool gotToken = false;
     bool gotExpiration = false;
+	bool gotDataAccessExpiration = false;
     String^ token;
     String^ expiration = nullptr;
+	String^ dataAccessExpiration = nullptr;
     FBAccessTokenData^ data = nullptr;
 
     WwwFormUrlDecoder^ decoder = FBAccessTokenData::ParametersFromResponse(
@@ -157,11 +175,16 @@ FBAccessTokenData^ FBAccessTokenData::FromUri(
             expiration = entry->Value;
             gotExpiration = true;
         }
+		else if (entry->Name->Equals(L"data_access_expiration_time"))
+		{
+			dataAccessExpiration = entry->Value;
+			gotDataAccessExpiration = true;
+		}
     }
 
-    if (gotToken && gotExpiration)
+    if (gotToken && gotExpiration && gotDataAccessExpiration)
     {
-        data = ref new FBAccessTokenData(token, expiration);
+        data = ref new FBAccessTokenData(token, expiration, dataAccessExpiration);
     }
 
     return data;
@@ -176,6 +199,22 @@ bool FBAccessTokenData::IsExpired(
     expired = (cal->CompareDateTime(ExpirationDate) >= 0);
 
     return expired;
+}
+
+bool FBAccessTokenData::IsDataAccessExpired(
+)
+{
+	if (_hasDataAccessExpirationDate) {
+		bool expired = true;
+		Calendar^ cal = ref new Calendar();
+		cal->SetToNow();
+		expired = (cal->CompareDateTime(DataAccessExpirationDate) >= 0);
+
+		return expired;
+	}
+	else {
+		return false;
+	}
 }
 
 void FBAccessTokenData::SetPermissions(
@@ -216,6 +255,20 @@ void FBAccessTokenData::CalculateExpirationDateTime(
     _expirationDate = cal->GetDateTime();
 }
 
+void FBAccessTokenData::CalculateDataAccessExpirationDateTime(
+	String^ DataAccessExpiration
+)
+{
+	Calendar^ cal = ref new Calendar();
+	int numSecs = _wtoi(DataAccessExpiration->Data());
+	if (numSecs != 0) {
+		cal->SetToNow();
+		cal->AddSeconds(numSecs);
+		_dataAccessExpirationDate = cal->GetDateTime();
+		_hasDataAccessExpirationDate = true;
+	}
+}
+
 #ifdef _DEBUG
 void FBAccessTokenData::DebugPrintExpirationTime(
     )
@@ -227,5 +280,10 @@ void FBAccessTokenData::DebugPrintExpirationTime(
     String^ msgString = L"Token expires at " + dtfDay->Format(_expirationDate) +
         L", " + dtfTime->Format(_expirationDate) + L"\n";
     OutputDebugString(msgString->Data());
+	if (_hasDataAccessExpirationDate) {
+		msgString = L"Data Access Permissions expires at " + dtfDay->Format(_dataAccessExpirationDate) +
+			L", " + dtfTime->Format(_dataAccessExpirationDate) + L"\n";
+		OutputDebugString(msgString->Data());
+	}
 }
 #endif

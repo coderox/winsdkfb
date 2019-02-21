@@ -16,6 +16,7 @@
     <ClCompile Include="UnitTestApp.xaml.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="..\..\FBWinStoreCppTests\LoginTests.cpp" />
+    <ClCompile Include="FBAccessTokenDataTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
